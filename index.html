@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OSINT Academy – Student Quiz</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --accent: #00ff88;
+      --accent2: #58a6ff;
+
+
+      
+      --danger: #ff4444;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header .logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    header .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .badge {
+      background: #00ff8822;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Tabs */
+    .tabs-wrapper {
+      max-width: 900px;
+      margin: 30px auto 0;
+      padding: 0 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-content { display: none; padding-top: 28px; }
+    .tab-content.active { display: block; }
+
+    /* Case header */
+    .case-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .case-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .case-header p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .case-header .steps {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .case-header .steps strong { color: var(--accent2); }
+
+    .tool-link {
+      color: var(--accent2);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .tool-link:hover { text-decoration: underline; }
+
+    /* Questions */
+    .question-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .question-card:focus-within { border-color: var(--accent2); }
+
+    .question-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .q-number {
+      background: #00ff8822;
+      color: var(--accent);
+      border: 1px solid #00ff8844;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .question-text {
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #f7c948;
+      background: #f7c94810;
+      border: 1px solid #f7c94830;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .hint-icon { flex-shrink: 0; }
+
+    .answer-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      resize: vertical;
+      min-height: 70px;
+      line-height: 1.5;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .answer-input:focus { border-color: var(--accent2); }
+
+    /* Footer actions */
+    .quiz-actions {
+      max-width: 900px;
+      margin: 32px auto 40px;
+      padding: 0 20px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: #ff444422;
+      color: var(--danger);
+      border: 1px solid #ff444440;
+    }
+
+    /* Saved alert */
+    #save-alert {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #00ff8822;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    #save-alert.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .tab-btn { padding: 10px 12px; font-size: 12px; }
+      header { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">&#x1F50E; AJAK CyberAcademy</div>
+    <div class="subtitle">Open Source Intelligence (OSINT) – Student Quiz</div>
+  </div>
+  <span class="badge">OSINT Lab</span>
+</header>
+
+<!-- Tabs -->
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">&#x1F5BC; Case 1 – Meta Investigation</button>
+    <button class="tab-btn" onclick="switchTab(1)">&#x1F4C2; Case 2 – Epstein Files</button>
+    <button class="tab-btn" onclick="switchTab(2)">&#x1F575; Case 3 – Criminal Bio</button>
+  </div>
+
+  <!-- ==================== CASE 1 ==================== -->
+  <div class="tab-content active" id="tab-0">
+
+    <div class="case-header">
+      <h2>&#x1F5BC; Case 1 – Catch the Criminal! (Image Metadata OSINT)</h2>
+      <p>
+        A criminal on the run posted images online with the caption
+        <em>"I'm roaming free. You will never catch me."</em>
+        Law Enforcement has handed you the evidence images. Use EXIF metadata analysis to track them down.
+      </p>
+      <div class="steps">
+        <strong>Steps:</strong><br/>
+        1. Upload the provided evidence images at
+        <a class="tool-link" href="https://onlineexifviewer.com" target="_blank">onlineexifviewer.com</a><br/>
+        2. Analyse all metadata fields carefully<br/>
+        3. Answer all questions below — don't let the criminal run!
+      </div>
+    </div>
+
+    <!-- Q1 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">1</span>
+        <span class="question-text">What is the camera model used to take the evidence photo?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q1" placeholder="e.g. Samsung Galaxy S21 / iPhone 13 Pro ..."></textarea>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">2</span>
+        <span class="question-text">When was the picture taken? (Mention exact Date &amp; Time)</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q2" placeholder="e.g. 2023-07-14 at 15:32:07"></textarea>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">3</span>
+        <span class="question-text">What are the GPS coordinates of the picture? (Exact Latitude &amp; Longitude)</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q3" placeholder="e.g. Lat: 13.0827° N, Long: 80.2707° E"></textarea>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">4</span>
+        <span class="question-text">Did the flash fire on the camera when the photo was taken?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q4" placeholder="Yes / No – and state the flash mode if shown"></textarea>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">5</span>
+        <span class="question-text">What does the comment embedded in the first image (Evidence_1) say?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q5" placeholder="Write the exact comment text found in EXIF data"></textarea>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">6</span>
+        <span class="question-text">What is the file size of <strong>Evidence_2</strong> in bytes?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q6" placeholder="e.g. 2,457,600 bytes"></textarea>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">7</span>
+        <span class="question-text">What is the file size of <strong>Evidence_1</strong> in bytes?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q7" placeholder="e.g. 3,145,728 bytes"></textarea>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">8</span>
+        <span class="question-text">Based on the GPS coordinates found, where could the criminal be? Name the location.</span>
+      </div>
+      <textarea class="answer-input" data-qid="c1q8" placeholder="Paste coordinates into Google Maps and identify the place..."></textarea>
+    </div>
+
+  </div><!-- /tab-0 -->
+
+  <!-- ==================== CASE 2 ==================== -->
+  <div class="tab-content" id="tab-1">
+
+    <div class="case-header">
+      <h2>&#x1F4C2; Case 2 – Epstein Files Investigation</h2>
+      <p>
+        Analyse declassified evidence files, released FBI documents, and open-source records related to the Jeffrey Epstein case.
+        Use the provided PDFs, images, and public resources to answer each question.
+      </p>
+      <div class="steps">
+        <strong>Resources:</strong><br/>
+        • Evidence PDFs (Evidence1.pdf, Evidence2.pdf, Evidence3.pdf) – provided in the case folder<br/>
+        • Images: Image1.jpg, image2.webp, image3.webp<br/>
+        • Reference site: <a class="tool-link" href="https://epstein-files-data.vercel.app/" target="_blank">epstein-files-data.vercel.app</a><br/>
+        • Google Search / Google Images for aerial views
+      </div>
+    </div>
+
+    <!-- Q1 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">1</span>
+        <span class="question-text">Who is the person in <strong>Image 1</strong>? Write 3 key points about them.</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q1" placeholder="Name:&#10;Point 1:&#10;Point 2:&#10;Point 3:"></textarea>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">2</span>
+        <span class="question-text">Where is the location shown in <strong>Image 2</strong>?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q2" placeholder="Describe or name the location visible in Image 2"></textarea>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">3</span>
+        <span class="question-text">What logo was replicated in connection with the Epstein files? (Search "Epstein Island aerial image" in Google)</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q3" placeholder="Name the logo / symbol found"></textarea>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">4</span>
+        <span class="question-text">What were all the different <em>types</em> of documents released by the US FBI regarding the Epstein case?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q4" placeholder="List each document type (e.g. FD-302 interview reports, ...)"></textarea>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">5</span>
+        <span class="question-text">What terminology was commonly used in the Epstein files to describe underage individuals?
+          <br/><small style="color:var(--muted)">(Refer: epstein-files-data.vercel.app)</small>
+        </span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q5" placeholder="Write the specific term(s) used in the documents"></textarea>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">6</span>
+        <span class="question-text">List <strong>three reasons</strong> (one line each) why some names in the Epstein files were redacted.</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q6" placeholder="Reason 1:&#10;Reason 2:&#10;Reason 3:"></textarea>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">7</span>
+        <span class="question-text">Analyse <strong>Evidence1.pdf</strong> &amp; <strong>Evidence2.pdf</strong> and summarise what could have happened (3 lines max).</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q7" placeholder="3-line summary of what the documents suggest..."></textarea>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">8</span>
+        <span class="question-text">Who is the person in <strong>Image 3</strong>? When and where was the image taken?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q8" placeholder="Name:&#10;Date:&#10;Location:"></textarea>
+    </div>
+
+    <div class="case-header" style="border-color:#f7c94840; background:#f7c94808">
+      <p style="color:#f7c948; font-size:13px;">
+        &#x26A0; The following questions (9–14) are based on allegations and are included <strong>for learning purposes only</strong>. They are not confirmed by FBI officials.
+      </p>
+    </div>
+
+    <!-- Q9 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">9</span>
+        <span class="question-text">Which Michael Jackson song was referenced in relation to the Jeffrey Epstein files, and why was it significant? Name any 2 songs.</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q9" placeholder="Song 1:&#10;Song 2:&#10;Significance:"></textarea>
+    </div>
+
+    <!-- Q10 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">10</span>
+        <span class="question-text">Write down the 2-line lyrics where Michael Jackson mentioned saving the children.</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q10" placeholder="Line 1:&#10;Line 2:"></textarea>
+    </div>
+
+    <!-- Q11 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">11</span>
+        <span class="question-text">Which band featured when Michael Jackson collaborated on the song <em>"They Don't Care About Us"</em>?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q11" placeholder="Band name"></textarea>
+    </div>
+
+    <!-- Q12 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">12</span>
+        <span class="question-text">Compare the Olodum logo and the logo used by Michael Jackson in <em>"They Don't Care About Us"</em> video. What potential difference do you notice?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q12" placeholder="Describe the visual difference between the two logos..."></textarea>
+    </div>
+
+    <!-- Q13 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">13</span>
+        <span class="question-text">When did Epstein die, and how?</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q13" placeholder="Date of death:&#10;Stated cause:"></textarea>
+    </div>
+
+    <!-- Q14 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">14</span>
+        <span class="question-text">Why is Epstein's death considered controversial? List 3 reasons. (Refer to Evidence3.pdf)</span>
+      </div>
+      <textarea class="answer-input" data-qid="c2q14" placeholder="Reason 1:&#10;Reason 2:&#10;Reason 3:"></textarea>
+    </div>
+
+  </div><!-- /tab-1 -->
+
+  <!-- ==================== CASE 3 ==================== -->
+  <div class="tab-content" id="tab-2">
+
+    <div class="case-header">
+      <h2>&#x1F575; Case 3 – Find the Criminal's Bio (Advanced OSINT)</h2>
+      <p>
+        Police recovered an image from a suspect's laptop but couldn't identify them.
+        As an OSINT investigator, you must trace the criminal's personal information and submit it to Law Enforcement.
+      </p>
+      <div class="steps">
+        <strong>Evidence Image:</strong><br/>
+        <a class="tool-link" href="https://raw.githubusercontent.com/OsintDojo/public/3f178408909bc1aae7ea2f51126984a8813b0901/sakurapwnedletter.svg" target="_blank">
+          sakurapwnedletter.svg (click to open)
+        </a><br/><br/>
+        <strong>Key Tools:</strong>
+        <a class="tool-link" href="https://google.com" target="_blank">Google</a> &nbsp;|&nbsp;
+        <a class="tool-link" href="https://github.com" target="_blank">GitHub</a> &nbsp;|&nbsp;
+        <a class="tool-link" href="https://etherscan.io" target="_blank">Etherscan.io</a> &nbsp;|&nbsp;
+        <a class="tool-link" href="https://tineye.com" target="_blank">TinEye</a> &nbsp;|&nbsp;
+        Google Lens &nbsp;|&nbsp; Google Images
+      </div>
+    </div>
+
+    <!-- Q1 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">1</span>
+        <span class="question-text">What is the <strong>username</strong> of the criminal?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> View Page Source of the SVG file to find the embedded username.</div>
+      <textarea class="answer-input" data-qid="c3q1" placeholder="Username:"></textarea>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">2</span>
+        <span class="question-text">What is the attacker's <strong>full real name</strong>?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Enter the found username in the Google Images tab to reveal the real identity.</div>
+      <textarea class="answer-input" data-qid="c3q2" placeholder="Full Name:"></textarea>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">3</span>
+        <span class="question-text">What is the <strong>full email address</strong> used by the attacker?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Search the username on Google → navigate to their GitHub repos → use ChatGPT or decoding tools to extract the email address.</div>
+      <textarea class="answer-input" data-qid="c3q3" placeholder="Email address:"></textarea>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">4</span>
+        <span class="question-text">What <strong>cryptocurrency</strong> does the attacker own a wallet for?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Navigate to the attacker's GitHub profile and search their repositories for any cryptocurrency-related repos.</div>
+      <textarea class="answer-input" data-qid="c3q4" placeholder="Cryptocurrency name:"></textarea>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">5</span>
+        <span class="question-text">What is the attacker's <strong>cryptocurrency wallet address</strong>?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Look in the Commits tab of the relevant GitHub repo. The address starts with <code style="color:var(--accent)">0xa</code>.</div>
+      <textarea class="answer-input" data-qid="c3q5" placeholder="0xa..."></textarea>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">6</span>
+        <span class="question-text">What <strong>mining pool</strong> did the attacker receive a payment from on January 23, 2021 UTC?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Paste the wallet address into <a class="tool-link" href="https://etherscan.io" target="_blank">etherscan.io</a>, filter by date, and click the January 23, 2021 transaction.</div>
+      <textarea class="answer-input" data-qid="c3q6" placeholder="Mining pool name:"></textarea>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">7</span>
+        <span class="question-text">What <strong>other cryptocurrency</strong> did the attacker transfer using their wallet?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> On Etherscan, check the "To" tab of the wallet transactions to find transfers of a different coin.</div>
+      <textarea class="answer-input" data-qid="c3q7" placeholder="Second cryptocurrency name:"></textarea>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">8</span>
+        <span class="question-text">What is the attacker's current <strong>Twitter/X handle</strong>?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Search the criminal's name on Google and look for their Twitter/X profile link.</div>
+      <textarea class="answer-input" data-qid="c3q8" placeholder="@username"></textarea>
+    </div>
+
+    <!-- Q9 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">9</span>
+        <span class="question-text">Is there any post on their Twitter/X account that mentions the <strong>Dark Web</strong>?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Browse their tweets carefully. Answer with Yes or No.</div>
+      <textarea class="answer-input" data-qid="c3q9" placeholder="Yes / No"></textarea>
+    </div>
+
+    <!-- Q10 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">10</span>
+        <span class="question-text">Which <strong>airport is closest</strong> to the location where the attacker shared a photo before boarding a flight?
+          <br/><small style="color:var(--muted)">(Tweet contains the phrase: "before heading home!")</small>
+        </span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Find that tweet → right-click image → "Search with Google Lens" → identify the place → Google "airport near [place name]".</div>
+      <textarea class="answer-input" data-qid="c3q10" placeholder="Airport name and code (e.g. Changi Airport, SIN):"></textarea>
+    </div>
+
+    <!-- Q11 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">11</span>
+        <span class="question-text">What airport did the attacker have their <strong>last layover</strong> in?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Find the "My final layover" tweet → right-click copy image address → paste in <a class="tool-link" href="https://tineye.com" target="_blank">tineye.com</a> → compare results with their posted images.</div>
+      <textarea class="answer-input" data-qid="c3q11" placeholder="Airport name:"></textarea>
+    </div>
+
+    <!-- Q12 -->
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">12</span>
+        <span class="question-text">What <strong>lake</strong> can be seen in the map shared by the attacker?</span>
+      </div>
+      <div class="hint"><span class="hint-icon">&#x1F4A1;</span> Right-click map image → Search with Google → crop the island area → get the island name → paste in Google Maps to find the nearby lake.</div>
+      <textarea class="answer-input" data-qid="c3q12" placeholder="Lake name:"></textarea>
+    </div>
+
+  </div><!-- /tab-2 -->
+
+</div><!-- /tabs-wrapper -->
+
+<!-- Actions -->
+<div class="quiz-actions">
+  <button class="btn btn-danger" onclick="clearAll()">&#x1F5D1; Clear All</button>
+  <button class="btn btn-secondary" onclick="saveProgress()">&#x1F4BE; Save Progress</button>
+  <button class="btn btn-primary" onclick="submitQuiz()">&#x2705; Submit Quiz</button>
+</div>
+
+<div id="save-alert">&#x2705; Progress saved!</div>
+
+<script>
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  function switchTab(idx) {
+    tabBtns.forEach((b, i) => b.classList.toggle('active', i === idx));
+    tabContents.forEach((c, i) => c.classList.toggle('active', i === idx));
+  }
+
+  // Session storage (clears when tab/browser closes)
+  const STORAGE_KEY = 'ajak_osint_quiz';
+
+  function getAllAnswers() {
+    const data = { answers: {} };
+    document.querySelectorAll('.answer-input').forEach(el => {
+      data.answers[el.dataset.qid] = el.value;
+    });
+    return data;
+  }
+
+  function loadSaved() {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY));
+      if (!saved) return;
+      if (saved.answers) {
+        document.querySelectorAll('.answer-input').forEach(el => {
+          if (saved.answers[el.dataset.qid]) el.value = saved.answers[el.dataset.qid];
+        });
+      }
+    } catch(e) {}
+  }
+
+  function saveProgress() {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(getAllAnswers()));
+    const alert = document.getElementById('save-alert');
+    alert.classList.add('show');
+    setTimeout(() => alert.classList.remove('show'), 2500);
+  }
+
+  // Auto-save on every input
+  document.addEventListener('input', e => {
+    if (e.target.classList.contains('answer-input')) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(getAllAnswers()));
+    }
+  });
+
+  // Auto-save every 60s
+  setInterval(saveProgress, 60000);
+
+  function clearAll() {
+    if (!confirm('Clear ALL answers? This cannot be undone.')) return;
+    document.querySelectorAll('.answer-input').forEach(el => el.value = '');
+    sessionStorage.removeItem(STORAGE_KEY);
+  }
+
+  function submitQuiz() {
+    const data = getAllAnswers();
+
+    // Build a printable summary
+    let output = `AJAK CyberAcademy – OSINT Quiz Submission\n`;
+    output += `==========================================\n`;
+    output += `Date: ${new Date().toLocaleString()}\n\n`;
+
+    const sections = [
+      { label: 'CASE 1 – Meta Investigation', prefix: 'c1', count: 8 },
+      { label: 'CASE 2 – Epstein Files', prefix: 'c2', count: 14 },
+      { label: 'CASE 3 – Criminal Bio', prefix: 'c3', count: 12 },
+    ];
+
+    sections.forEach(sec => {
+      output += `\n--- ${sec.label} ---\n`;
+      for (let i = 1; i <= sec.count; i++) {
+        const key = `${sec.prefix}q${i}`;
+        output += `Q${i}: ${data.answers[key] || '(no answer)'}\n`;
+      }
+    });
+
+    // Download as text file
+    const blob = new Blob([output], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `OSINT_Quiz_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    saveProgress();
+    alert('Quiz submitted! Your answers have been downloaded as a text file.');
+  }
+
+  // Load saved on start
+  loadSaved();
+</script>
+</body>
+</html>
